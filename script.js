@@ -95,7 +95,7 @@ class PanelPlacementApp {
         this.isDrawingPolygon = false;
 
         this.elements.addPointBtn.addEventListener('click', () => {
-            this.isDrawingPolygon = true;
+            this.startPolygonDrawing();
         });
 
         this.elements.finishDrawingBtn.addEventListener('click', () => {
@@ -115,18 +115,66 @@ class PanelPlacementApp {
             const y = e.clientY - rect.top;
             this.addPolygonPoint(x, y);
         });
+
+        this.polygonCanvas.addEventListener('mousemove', (e) => {
+            if (!this.isDrawingPolygon || this.polygonPoints.length === 0) return;
+            const rect = this.polygonCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            this.redrawPolygon();
+            const last = this.polygonPoints[this.polygonPoints.length - 1];
+            this.polygonCtx.beginPath();
+            this.polygonCtx.moveTo(last.x, last.y);
+            this.polygonCtx.lineTo(x, y);
+            this.polygonCtx.strokeStyle = '#888';
+            this.polygonCtx.stroke();
+            this.polygonCtx.strokeStyle = '#000';
+            const segLen = Math.hypot(x - last.x, y - last.y);
+            this.elements.segmentInfo.textContent = `Uzunluk: ${segLen.toFixed(2)} px`;
+        });
+    }
+
+    startPolygonDrawing() {
+        this.polygonPoints = [];
+        this.polygonCtx.clearRect(0, 0, this.polygonCanvas.width, this.polygonCanvas.height);
+        this.isDrawingPolygon = true;
+        this.elements.segmentInfo.textContent = '';
+        this.elements.confirmPolygonBtn.style.display = 'none';
+    }
+
+    redrawPolygon(close = false) {
+        this.polygonCtx.clearRect(0, 0, this.polygonCanvas.width, this.polygonCanvas.height);
+        const pts = this.polygonPoints;
+        for (let i = 1; i < pts.length; i++) {
+            const prev = pts[i - 1];
+            const curr = pts[i];
+            this.polygonCtx.beginPath();
+            this.polygonCtx.moveTo(prev.x, prev.y);
+            this.polygonCtx.lineTo(curr.x, curr.y);
+            this.polygonCtx.stroke();
+        }
+        if (close && pts.length > 2) {
+            const first = pts[0];
+            const last = pts[pts.length - 1];
+            this.polygonCtx.beginPath();
+            this.polygonCtx.moveTo(last.x, last.y);
+            this.polygonCtx.lineTo(first.x, first.y);
+            this.polygonCtx.stroke();
+        }
+        pts.forEach(pt => {
+            this.polygonCtx.beginPath();
+            this.polygonCtx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+            this.polygonCtx.fill();
+        });
     }
 
     addPolygonPoint(x, y) {
         this.polygonPoints.push({ x, y });
         const pts = this.polygonPoints;
         const len = pts.length;
+        this.redrawPolygon();
         if (len > 1) {
             const prev = pts[len - 2];
-            this.polygonCtx.beginPath();
-            this.polygonCtx.moveTo(prev.x, prev.y);
-            this.polygonCtx.lineTo(x, y);
-            this.polygonCtx.stroke();
             const segLen = Math.hypot(x - prev.x, y - prev.y);
             this.elements.segmentInfo.textContent = `Uzunluk: ${segLen.toFixed(2)} px`;
         }
@@ -140,13 +188,7 @@ class PanelPlacementApp {
 
     closePolygon() {
         if (this.polygonPoints.length < 3) return;
-        const pts = this.polygonPoints;
-        const first = pts[0];
-        const last = pts[pts.length - 1];
-        this.polygonCtx.beginPath();
-        this.polygonCtx.moveTo(last.x, last.y);
-        this.polygonCtx.lineTo(first.x, first.y);
-        this.polygonCtx.stroke();
+        this.redrawPolygon(true);
         this.isDrawingPolygon = false;
         this.elements.confirmPolygonBtn.style.display = 'inline-block';
     }
