@@ -92,6 +92,8 @@ class PanelPlacementApp {
         window.addEventListener('resize', setCanvasSize);
 
         this.polygonCtx = this.polygonCanvas.getContext('2d');
+        this.polygonCtx.lineWidth = 2;
+        this.polygonCtx.strokeStyle = '#000';
         this.isDrawingPolygon = false;
 
         this.elements.addPointBtn.addEventListener('click', () => {
