@@ -97,6 +97,18 @@ input[type="number"]:focus {
     color: #6c757d;
 }
 
+.mode-toggle {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.mode-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 /* Button Stili */
 .btn {
     padding: 12px 20px;
