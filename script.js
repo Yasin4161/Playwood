@@ -208,6 +208,23 @@ class PanelPlacementApp {
             this.elements.polygonDrawing.style.display = '';
             this.elements.resetPolygonBtn.style.display = 'none';
         } else {
+            if (this.polygonPoints.length > 0) {
+                const confirmReset = confirm('Çokgen çizimi temizlenecek. Devam etmek istiyor musunuz?');
+                if (!confirmReset) {
+                    this.elements.modeDrawing.checked = true;
+                    this.elements.modeNumeric.checked = false;
+                    this.elements.numericArea.style.display = 'none';
+                    this.elements.polygonDrawing.style.display = '';
+                    return;
+                }
+                this.polygonPoints = [];
+                this.polygonArea = 0;
+                if (this.polygonCtx) {
+                    this.polygonCtx.clearRect(0, 0, this.polygonCanvas.width, this.polygonCanvas.height);
+                }
+                this.elements.segmentInfo.textContent = '';
+                this.elements.confirmPolygonBtn.style.display = 'none';
+            }
             this.elements.numericArea.style.display = '';
             this.elements.polygonDrawing.style.display = 'none';
             if (this.polygonPoints.length > 0) {
@@ -432,12 +449,19 @@ class PanelPlacementApp {
             return;
         }
 
+        const areaWidthVal = this.elements.areaWidth.value;
+        const areaHeightVal = this.elements.areaHeight.value;
         const polygonDefined = this.polygonPoints && this.polygonPoints.length > 0;
+
+ codex/update-calculateplacement-for-area-values
+        let areaWidth = polygonDefined ? null : parseFloat(areaWidthVal);
+        let areaHeight = polygonDefined ? null : parseFloat(areaHeightVal);
 
         const areaWidthVal = this.elements.areaWidth.value;
         const areaHeightVal = this.elements.areaHeight.value;
         const areaWidth = polygonDefined ? null : parseFloat(areaWidthVal);
         const areaHeight = polygonDefined ? null : parseFloat(areaHeightVal);
+ main
 
         if (!polygonDefined) {
             if (!areaWidthVal || !areaHeightVal || areaWidth <= 0 || areaHeight <= 0) {
