@@ -5,202 +5,6 @@ class PanelPlacementApp {
         this.placedPanels = [];
         this.canvas = null;
         this.ctx = null;
-        this.polygonPoints = [];
-        this.polygonArea = 0;
-        this.colors = [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
-            '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
-            '#10AC84', '#EE5A24', '#0C2461', '#1DD1A1', '#FD79A8'
-        ];
-        
-        this.init();
-        this.loadPanels();
-        this.addDefaultPanels();
-    }
-
-    init() {
-        // DOM elementlerini bul
-        this.elements = {
-            panelWidth: document.getElementById('panelWidth'),
-            panelHeight: document.getElementById('panelHeight'),
-            panelCount: document.getElementById('panelCount'),
-            addPanelBtn: document.getElementById('addPanelBtn'),
-            panelsList: document.getElementById('panelsList'),
-            emptyPanels: document.getElementById('emptyPanels'),
-            areaWidth: document.getElementById('areaWidth'),
-            areaHeight: document.getElementById('areaHeight'),
-            allowRotation: document.getElementById('allowRotation'),
-            calculateBtn: document.getElementById('calculateBtn'),
-            resultsSection: document.getElementById('resultsSection'),
-            usedPanelsCount: document.getElementById('usedPanelsCount'),
-            remainingArea: document.getElementById('remainingArea'),
-            efficiency: document.getElementById('efficiency'),
-            panelDetails: document.getElementById('panelDetails'),
-            panelDetailsList: document.getElementById('panelDetailsList'),
-            visualizationCanvas: document.getElementById('visualizationCanvas'),
-            exportBtn: document.getElementById('exportBtn'),
-            toast: document.getElementById('toast'),
-            polygonCanvas: document.getElementById('polygonCanvas'),
-            addPointBtn: document.getElementById('addPointBtn'),
-            finishDrawingBtn: document.getElementById('finishDrawingBtn'),
-            confirmPolygonBtn: document.getElementById('confirmPolygonBtn'),
-            segmentInfo: document.getElementById('segmentInfo')
- codex/add-polygon-drawing-functionality
-
-        };
-
-        // Event listener'ları ekle
-        this.elements.addPanelBtn.addEventListener('click', () => this.addPanel());
-        this.elements.calculateBtn.addEventListener('click', () => this.calculatePlacement());
-        this.elements.exportBtn.addEventListener('click', () => this.exportCanvas());
-
-        // Enter tuşu ile panel ekleme
-        this.elements.panelWidth.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.addPanel();
-        });
-        this.elements.panelHeight.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.addPanel();
-        });
-        this.elements.panelCount.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.addPanel();
-        });
-
-        // Enter tuşu ile hesaplama
-        this.elements.areaWidth.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.calculatePlacement();
-        });
-        this.elements.areaHeight.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.calculatePlacement();
-        });
-
-        // Canvas'ı ayarla
-        this.canvas = this.elements.visualizationCanvas;
-        this.ctx = this.canvas.getContext('2d');
-        Arşivle
-
-Paylaş
-
-PR oluştur
-
-
-1. `script.js` içinde `PanelPlacementApp` sınıfına `initPolygonDrawing` benzeri bir fonksiyon ekle.
-2. Canvas’ta tıklanan noktaları `this.polygonPoints` dizisinde tut; her yeni nokta eklenirken önceki noktayla segment çiz ve uzunluğunu hesaplayıp kullanıcıya göster.
-3. İlk noktaya geri dönüldüğünde çokgeni kapatıp “Tamam” butonuyla alanı hesapla ve `this.polygonArea` içine kaydet.
-4. HTML’de “Nokta Ekle”, “Çizimi Bitir” butonlarını ve segment uzunluğunu canlı gösteren küçük bir panel ekle.
-Kopyala
-Summary
-
-Added polygon drawing state and control elements to PanelPlacementApp, including storage for points and area data, as well as references to new buttons and canvas elements
-
-Implemented initPolygonDrawing with handlers for starting, finishing, and confirming a polygon, wiring canvas clicks to draw segments and update segment length info
-
-Created methods to add polygon points, close the shape, and calculate its area, saving results to polygonArea for later use
-
-Introduced a UI panel in HTML with “Nokta Ekle,” “Çizimi Bitir,” and “Tamam” buttons, a live segment-length display, and a canvas dedicated to polygon drawing
-
-Testing
-
-node --check script.js && echo "syntax ok"
-
-npm test (fails: Could not read package.json)
-
-
-Dosya (2)
-Bu kod github repoma uygulandı mı
-Kopyala
-Bu kodun GitHub deposuna uygulanıp uygulanmadığını buradan kesin olarak göremiyorum. Bizim oturumumuz yalnızca yerel dosya sistemindeki değişiklikleri gösteriyor; bunlar henüz GitHub’a “push” edilmiş olmayabilir.
-
-GitHub’daki depo durumunu kontrol etmek isterseniz:
-
-Yerelde git status veya git log ile commit’in varlığını doğrulayın.
-
-GitHub’daki repo sayfasını açıp commit geçmişinde ilgili değişikliği arayın.
-
-Eğer push edilmemişse, git push origin <branch> komutuyla commit’i gönderin.
-
-Bu adımlarla kodun GitHub’da olup olmadığını anlayabilirsiniz.
-
-
-
-Diff
-Günlükler
-index.html
-+10
--0
-
-@@ -40,50 +40,60 @@
-            </section>
-
-            <!-- İnşaat Alanı Bölümü -->
-            <section class="area-section">
-                <h2><i class="fas fa-ruler-combined"></i> İnşaat Alanı</h2>
-                
-                <div class="area-form">
-                    <div class="input-group">
-                        <input type="number" id="areaWidth" placeholder="Genişlik (m)" min="0.1" step="0.1">
-                        <span class="input-separator">×</span>
-                        <input type="number" id="areaHeight" placeholder="Yükseklik (m)" min="0.1" step="0.1">
-                    </div>
-                    
-                    <div class="options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="allowRotation" checked>
-                            <span class="checkmark"></span>
-                            Kalıpların dönmesine izin ver (90°)
-                        </label>
-                    </div>
-                    
-                    <button id="calculateBtn" class="btn btn-success">
-                        <i class="fas fa-calculator"></i> Yerleştirmeyi Hesapla
-                    </button>
-                </div>
-
-                <div class="polygon-drawing">
-                    <div class="drawing-controls">
-                        <button id="addPointBtn" class="btn btn-secondary">Nokta Ekle</button>
-                        <button id="finishDrawingBtn" class="btn btn-secondary">Çizimi Bitir</button>
-                        <button id="confirmPolygonBtn" class="btn btn-primary" style="display: none;">Tamam</button>
-                        <div id="segmentInfo" class="segment-info"></div>
-                    </div>
-                    <canvas id="polygonCanvas" width="400" height="400"></canvas>
-                </div>
-            </section>
-
-            <!-- Sonuçlar Bölümü -->
-            <section class="results-section" id="resultsSection" style="display: none;">
-                <h2><i class="fas fa-chart-bar"></i> Yerleştirme Sonuçları</h2>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-th-large"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="usedPanelsCount">0</h3>
-                            <p>Kullanılan Panel</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-square"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="remainingArea">0</h3>
-                            <p>Kalan Alan (m²)</p>
-                        </div>
-script.js
-+82
--1
-
-// İnşaat Kalıp Yerleştirme Uygulaması
-class PanelPlacementApp {
-    constructor() {
-        this.panels = [];
-        this.placedPanels = [];
-        this.canvas = null;
-        this.ctx = null;
-        this.polygonPoints = [];
         this.polygonArea = 0;
         this.colors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
@@ -237,14 +41,12 @@ class PanelPlacementApp {
             panelDetailsList: document.getElementById('panelDetailsList'),
             visualizationCanvas: document.getElementById('visualizationCanvas'),
             exportBtn: document.getElementById('exportBtn'),
-            toast: document.getElementById('toast')
             toast: document.getElementById('toast'),
             polygonCanvas: document.getElementById('polygonCanvas'),
             addPointBtn: document.getElementById('addPointBtn'),
             finishDrawingBtn: document.getElementById('finishDrawingBtn'),
             confirmPolygonBtn: document.getElementById('confirmPolygonBtn'),
             segmentInfo: document.getElementById('segmentInfo')
- main
         };
 
         // Event listener'ları ekle
@@ -512,8 +314,7 @@ class PanelPlacementApp {
         // Sonuçları göster
         this.displayResults(results, beamRequirements, formPanels);
 
-        const bounds = this.getPolygonBounds(this.polygonPoints);
-        this.drawVisualization(bounds.width, bounds.height);
+        this.drawVisualization();
 
         // Sonuçlar bölümünü göster
         this.elements.resultsSection.style.display = 'block';
@@ -1081,14 +882,17 @@ class PanelPlacementApp {
     }
 
     // Görselleştirme çiz
-    drawVisualization(areaWidth, areaHeight) {
+    drawVisualization() {
         // Canvas boyutlarını ayarla - kenar boyutları için extra alan bırak
         const maxCanvasWidth = 800;
         const maxCanvasHeight = 600;
         const marginSize = 60; // Kenar yazıları için margin
-        
+
+        const bounds = this.getPolygonBounds(this.polygonPoints);
+        const areaWidth = bounds.width;
+        const areaHeight = bounds.height;
         const scale = Math.min((maxCanvasWidth - marginSize * 2) / areaWidth, (maxCanvasHeight - marginSize * 2) / areaHeight);
-        
+
         this.canvas.width = areaWidth * scale + marginSize * 2;
         this.canvas.height = areaHeight * scale + marginSize * 2;
 
@@ -1096,66 +900,89 @@ class PanelPlacementApp {
         this.ctx.fillStyle = 'white';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Ana alan koordinatları
-        const areaStartX = marginSize;
-        const areaStartY = marginSize;
-        const areaEndX = areaStartX + areaWidth * scale;
-        const areaEndY = areaStartY + areaHeight * scale;
+        // Polygonu origin'e kaydır ve ölçekle
+        const offsetX = marginSize;
+        const offsetY = marginSize;
+        const polygon = this.polygonPoints.map(p => ({
+            x: offsetX + (p.x - bounds.minX) * scale,
+            y: offsetY + (p.y - bounds.minY) * scale
+        }));
 
         // Ana inşaat alanı arka planı
         this.ctx.fillStyle = '#fafafa';
-        this.ctx.fillRect(areaStartX, areaStartY, areaWidth * scale, areaHeight * scale);
+        this.ctx.beginPath();
+        polygon.forEach((pt, i) => {
+            if (i === 0) this.ctx.moveTo(pt.x, pt.y);
+            else this.ctx.lineTo(pt.x, pt.y);
+        });
+        this.ctx.closePath();
+        this.ctx.fill();
 
         // Grid çiz
-        this.drawGrid(scale, areaStartX, areaStartY);
+        this.drawGrid(scale, polygon);
 
         // Kapatılamayan alanları hesapla ve sarı renkle göster
-        this.drawEmptyAreas(areaWidth, areaHeight, scale, areaStartX, areaStartY);
+        this.drawEmptyAreas(areaWidth, areaHeight, scale, offsetX, offsetY, bounds);
 
         // Panelleri çiz
         this.placedPanels.forEach(panel => {
-            this.drawPanel(panel, scale, areaStartX, areaStartY);
+            this.drawPanel(panel, scale, offsetX, offsetY);
         });
 
         // Ana alan sınırlarını çiz
         this.ctx.strokeStyle = '#2c3e50';
         this.ctx.lineWidth = 3;
-        this.ctx.strokeRect(areaStartX, areaStartY, areaWidth * scale, areaHeight * scale);
+        this.ctx.beginPath();
+        polygon.forEach((pt, i) => {
+            if (i === 0) this.ctx.moveTo(pt.x, pt.y);
+            else this.ctx.lineTo(pt.x, pt.y);
+        });
+        this.ctx.closePath();
+        this.ctx.stroke();
 
         // Kenar boyutlarını yaz
-        this.drawDimensions(areaWidth, areaHeight, scale, areaStartX, areaStartY, areaEndX, areaEndY);
+        this.drawPolygonDimensions(polygon, scale);
 
         // Legend oluştur
         this.createLegend();
     }
 
     // Grid çiz - PDF benzeri ince çizgiler
-    drawGrid(scale, offsetX, offsetY) {
+    drawGrid(scale, polygon) {
+        this.ctx.save();
+        this.ctx.beginPath();
+        polygon.forEach((pt, i) => {
+            if (i === 0) this.ctx.moveTo(pt.x, pt.y);
+            else this.ctx.lineTo(pt.x, pt.y);
+        });
+        this.ctx.closePath();
+        this.ctx.clip();
+
         this.ctx.strokeStyle = '#e0e0e0';
         this.ctx.lineWidth = 0.5;
         this.ctx.setLineDash([2, 2]);
 
         // 50cm aralıklarla grid
         const gridSize = 50 * scale;
-        const areaWidth = this.canvas.width - offsetX * 2;
-        const areaHeight = this.canvas.height - offsetY * 2;
+        const bounds = this.getPolygonBounds(polygon);
 
-        for (let x = 0; x <= areaWidth; x += gridSize) {
+        for (let x = bounds.minX; x <= bounds.maxX; x += gridSize) {
             this.ctx.beginPath();
-            this.ctx.moveTo(offsetX + x, offsetY);
-            this.ctx.lineTo(offsetX + x, offsetY + areaHeight);
+            this.ctx.moveTo(x, bounds.minY);
+            this.ctx.lineTo(x, bounds.maxY);
             this.ctx.stroke();
         }
 
-        for (let y = 0; y <= areaHeight; y += gridSize) {
+        for (let y = bounds.minY; y <= bounds.maxY; y += gridSize) {
             this.ctx.beginPath();
-            this.ctx.moveTo(offsetX, offsetY + y);
-            this.ctx.lineTo(offsetX + areaWidth, offsetY + y);
+            this.ctx.moveTo(bounds.minX, y);
+            this.ctx.lineTo(bounds.maxX, y);
             this.ctx.stroke();
         }
-        
+
         // Grid çiziminden sonra çizgi stilini normale dön
         this.ctx.setLineDash([]);
+        this.ctx.restore();
     }
 
     // Panel çiz
@@ -1194,10 +1021,21 @@ class PanelPlacementApp {
     }
 
     // Kapatılamayan alanları sarı renkle göster
-    drawEmptyAreas(areaWidth, areaHeight, scale, offsetX, offsetY) {
-        // Kullanılabilir alanları tutacak grid sistemi
-        const occupiedGrid = Array(Math.ceil(areaHeight)).fill(null)
+    drawEmptyAreas(areaWidth, areaHeight, scale, offsetX, offsetY, bounds) {
+        const polygon = this.polygonPoints.map(p => ({ x: p.x - bounds.minX, y: p.y - bounds.minY }));
+
+        // Çokgen maskesi oluştur
+        const maskGrid = Array(Math.ceil(areaHeight)).fill(null)
             .map(() => Array(Math.ceil(areaWidth)).fill(false));
+        for (let y = 0; y < maskGrid.length; y++) {
+            for (let x = 0; x < maskGrid[0].length; x++) {
+                const pt = { x: x + 0.5, y: y + 0.5 };
+                maskGrid[y][x] = this.pointInPolygon(pt, polygon);
+            }
+        }
+
+        // Dış alanları işgal edilmiş olarak işaretleyerek grid oluştur
+        const occupiedGrid = maskGrid.map(row => row.map(v => !v));
 
         // Yerleştirilen panelleri grid'de işaretle
         this.placedPanels.forEach(panel => {
@@ -1206,55 +1044,66 @@ class PanelPlacementApp {
 
         // Boş alanları bul ve sarı renkle göster
         this.emptyAreas = this.findEmptyAreas(occupiedGrid, areaWidth, areaHeight);
-        
+
         this.emptyAreas.forEach(area => {
             const x = offsetX + area.x * scale;
             const y = offsetY + area.y * scale;
             const width = area.width * scale;
             const height = area.height * scale;
-            
+
             // Minimum alan boyutu kontrolü - 1cm x 1cm ve üzeri alanları göster
             if (area.width >= 1 && area.height >= 1 && width > 3 && height > 3) {
-                
+
                 // Sarı alanı çiz
-                this.ctx.fillStyle = '#FFD700'; // Parlak sarı
+                this.ctx.fillStyle = '#FFD700';
                 this.ctx.fillRect(x, y, width, height);
-                
+
                 // Kalın siyah sınır çiz
                 this.ctx.strokeStyle = '#000000';
                 this.ctx.lineWidth = 3;
                 this.ctx.setLineDash([]);
                 this.ctx.strokeRect(x, y, width, height);
-                
+
                 // Boş alan boyutunu yaz - PDF benzeri temiz görünüm
                 const fontSize = Math.max(12, Math.min(width / 6, height / 3, 18));
                 this.ctx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`;
                 this.ctx.textAlign = 'center';
                 this.ctx.textBaseline = 'middle';
-                
+
                 const text = `${area.width.toFixed(0)}×${area.height.toFixed(0)} cm`;
-                const area_m2 = ((area.width * area.height) / 10000).toFixed(2);
-                const areaText = `(${area_m2} m²)`;
-                
-                const textX = x + width / 2;
-                const textY = y + height / 2;
-                
-                // Siyah gölge efekti için tekst
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-                this.ctx.fillText(text, textX + 1, textY - fontSize / 3 + 1);
-                this.ctx.font = `${fontSize * 0.7}px 'Segoe UI', Arial, sans-serif`;
-                this.ctx.fillText(areaText, textX + 1, textY + fontSize / 2 + 1);
-                
-                // Ana siyah tekst
                 this.ctx.fillStyle = '#000000';
-                this.ctx.font = `bold ${fontSize}px 'Segoe UI', Arial, sans-serif`;
-                this.ctx.fillText(text, textX, textY - fontSize / 3);
-                
-                // Alan miktarını alt satırda yaz
-                this.ctx.font = `${fontSize * 0.7}px 'Segoe UI', Arial, sans-serif`;
-                this.ctx.fillText(areaText, textX, textY + fontSize / 2);
+                this.ctx.fillText(text, x + width / 2 + 1, y + height / 2 + 1);
+
+                // Ana beyaz text
+                this.ctx.fillStyle = 'white';
+                this.ctx.fillText(text, x + width / 2, y + height / 2);
             }
         });
+    }
+
+    // Çokgen kenar boyutlarını yaz
+    drawPolygonDimensions(polygon, scale) {
+        this.ctx.fillStyle = '#2c3e50';
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+
+        for (let i = 0; i < polygon.length; i++) {
+            const p1 = polygon[i];
+            const p2 = polygon[(i + 1) % polygon.length];
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const length = Math.hypot(dx, dy) / scale;
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2;
+            const angle = Math.atan2(dy, dx);
+
+            this.ctx.save();
+            this.ctx.translate(midX, midY);
+            this.ctx.rotate(angle);
+            this.ctx.fillText(`${(length / 100).toFixed(1)}m (${length.toFixed(0)}cm)`, 0, -10);
+            this.ctx.restore();
+        }
     }
 
     // Boş alanları bul - Overlap düzeltmeli algoritma
