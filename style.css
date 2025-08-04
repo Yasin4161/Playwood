@@ -31,7 +31,7 @@ header {
 }
 
 header h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1.8rem, 4vw + 1rem, 2.5rem);
     margin-bottom: 10px;
     display: flex;
     align-items: center;
@@ -102,7 +102,7 @@ input[type="number"]:focus {
     padding: 12px 20px;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: clamp(0.85rem, 2vw + 0.5rem, 1rem);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -611,12 +611,22 @@ input[type="number"]:focus {
     .stats-grid {
         grid-template-columns: 1fr;
     }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
     
     .panel-item {
         flex-direction: column;
         gap: 15px;
         text-align: center;
         align-items: stretch;
+    }
+
+    .panel-info {
+        align-items: center;
+        text-align: center;
     }
 
     .panel-actions {
@@ -627,6 +637,14 @@ input[type="number"]:focus {
     .canvas-header {
         flex-direction: column;
         text-align: center;
+    }
+
+    .visualization {
+        padding: 15px;
+    }
+
+    .canvas-container {
+        padding: 8px;
     }
     
     .beam-details {
@@ -659,20 +677,62 @@ input[type="number"]:focus {
 
 @media (max-width: 480px) {
     header h1 {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
-    
+
     .btn {
-        padding: 10px 15px;
-        font-size: 0.9rem;
+        padding: 8px 12px;
+        font-size: 0.85rem;
     }
-    
+
+    .stat-card {
+        padding: 15px;
+        gap: 10px;
+    }
+
+    .panel-item {
+        padding: 12px;
+    }
+
+    .panel-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .canvas-header h3 {
+        font-size: 1rem;
+    }
+
+    .visualization {
+        padding: 10px;
+    }
+
+    .canvas-container {
+        padding: 5px;
+    }
+
     .stat-content h3 {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
-    
+
     input[type="number"] {
         padding: 10px 12px;
+    }
+}
+
+@media (max-width: 320px) {
+    header h1 {
+        font-size: 1.4rem;
+    }
+
+    .btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    .stat-content h3 {
+        font-size: 1.1rem;
     }
 }
 
