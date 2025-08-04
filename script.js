@@ -6,6 +6,7 @@ class PanelPlacementApp {
         this.canvas = null;
         this.ctx = null;
         this.polygonArea = 0;
+        this.scaleFactor = 1;
         this.colors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
             '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
@@ -46,7 +47,8 @@ class PanelPlacementApp {
             addPointBtn: document.getElementById('addPointBtn'),
             finishDrawingBtn: document.getElementById('finishDrawingBtn'),
             confirmPolygonBtn: document.getElementById('confirmPolygonBtn'),
-            segmentInfo: document.getElementById('segmentInfo')
+            segmentInfo: document.getElementById('segmentInfo'),
+            drawingScale: document.getElementById('drawingScale')
         };
 
         // Event listener'ları ekle
@@ -105,8 +107,11 @@ class PanelPlacementApp {
         });
 
         this.elements.confirmPolygonBtn.addEventListener('click', () => {
+            const scale = parseFloat(this.elements.drawingScale.value) || 1;
+            this.scaleFactor = scale;
+            this.polygonPoints = this.polygonPoints.map(p => ({ x: p.x * scale, y: p.y * scale }));
             this.polygonArea = this.calculatePolygonArea(this.polygonPoints);
-            this.elements.segmentInfo.textContent = `Alan: ${this.polygonArea.toFixed(2)} px²`;
+            this.elements.segmentInfo.textContent = `Alan: ${(this.polygonArea / 10000).toFixed(2)} m²`;
             this.elements.confirmPolygonBtn.style.display = 'none';
         });
 
@@ -323,42 +328,44 @@ class PanelPlacementApp {
             return;
         }
 
+        const polygonDefined = this.polygonPoints && this.polygonPoints.length > 0;
+
         const areaWidth = parseFloat(this.elements.areaWidth.value);
         const areaHeight = parseFloat(this.elements.areaHeight.value);
 
-        if (!areaWidth || !areaHeight || areaWidth <= 0 || areaHeight <= 0) {
-            this.showToast('Lütfen geçerli alan boyutları girin!', 'error');
-            return;
+        if (!polygonDefined) {
+            if (!areaWidth || !areaHeight || areaWidth <= 0 || areaHeight <= 0) {
+                this.showToast('Lütfen geçerli alan boyutları girin!', 'error');
+                return;
+            }
         }
 
-        // Metre'den cm'ye dönüştür
-        const areaCmWidth = areaWidth * 100;
-        const areaCmHeight = areaHeight * 100;
-
-        // Çokgen tanımlı değilse dikdörtgen oluştur
-        if (!this.polygonPoints || this.polygonPoints.length === 0) {
-            this.polygonPoints = [
+        let polygonPts = this.polygonPoints;
+        if (!polygonDefined) {
+            const areaCmWidth = areaWidth * 100;
+            const areaCmHeight = areaHeight * 100;
+            polygonPts = [
                 { x: 0, y: 0 },
                 { x: areaCmWidth, y: 0 },
                 { x: areaCmWidth, y: areaCmHeight },
                 { x: 0, y: areaCmHeight }
             ];
+            this.polygonPoints = polygonPts;
         }
 
-        // Çokgen alanını hesapla (cm² -> m²)
-        const totalArea = this.calculatePolygonArea(this.polygonPoints) / 10000;
+        const totalArea = this.calculatePolygonArea(polygonPts) / 10000;
 
-        // Yerleştirme algoritmasını çalıştır
-        this.placedPanels = this.placePanels(this.polygonPoints);
+        this.placedPanels = this.placePanels(polygonPts);
 
-        // Sonuçları hesapla
         const results = this.calculateResults(totalArea);
-        
-        // Beşon hesaplamalarını yap
-        const beamRequirements = this.calculateBeamRequirements(areaWidth, areaHeight);
-        
-        // Kalıp panel hesaplamalarını yap
-        const formPanels = this.calculateFormPanels(areaWidth, areaHeight);
+
+        const beamRequirements = polygonDefined ?
+            this.calculateBeamRequirements(null, null, polygonPts) :
+            this.calculateBeamRequirements(areaWidth, areaHeight);
+
+        const formPanels = polygonDefined ?
+            this.calculateFormPanels(null, null, polygonPts) :
+            this.calculateFormPanels(areaWidth, areaHeight);
 
         // Sonuçları göster
         this.displayResults(results, beamRequirements, formPanels);
@@ -539,25 +546,40 @@ class PanelPlacementApp {
     }
 
     // Beşon hesaplama
-    calculateBeamRequirements(areaWidth, areaHeight) {
+    calculateBeamRequirements(areaWidth, areaHeight, polygonPoints = []) {
+        if (polygonPoints && polygonPoints.length > 0) {
+            const areaM2 = this.calculatePolygonArea(polygonPoints) / 10000;
+            const sideM = Math.sqrt(areaM2);
+            const beamSets = Math.ceil((sideM * 100) / 50);
+            const beamCombination = this.calculateOptimalBeamCombination(sideM);
+            const edgeBeams = this.calculateEdgeBeams(null, null, polygonPoints);
+            return {
+                shortEdgeM: sideM,
+                longEdgeM: sideM,
+                beamCombination: beamCombination,
+                beamSets: beamSets,
+                edgeBeams: edgeBeams
+            };
+        }
+
         // Alan boyutları metre cinsinden
         const widthM = areaWidth;
         const heightM = areaHeight;
-        
+
         // Kısa ve uzun kenarları bul
         const shortEdgeM = Math.min(widthM, heightM);
         const longEdgeM = Math.max(widthM, heightM);
         const longEdgeCm = longEdgeM * 100;
-        
+
         // Beşon sayısı: uzun kenar cm / 50
         const beamSets = Math.ceil(longEdgeCm / 50);
-        
+
         // Kısa kenara göre optimal beşon kombinasyonu
         const beamCombination = this.calculateOptimalBeamCombination(shortEdgeM);
-        
+
         // Kenar beşonları hesapla - her kenar için 2'şer adet
         const edgeBeams = this.calculateEdgeBeams(areaWidth, areaHeight);
-        
+
         return {
             shortEdgeM: shortEdgeM,
             longEdgeM: longEdgeM,
@@ -568,14 +590,37 @@ class PanelPlacementApp {
     }
 
     // Kenar beşonları hesapla - her kenar için 2'şer adet
-    calculateEdgeBeams(areaWidth, areaHeight) {
+    calculateEdgeBeams(areaWidth, areaHeight, polygonPoints = []) {
+        if (polygonPoints && polygonPoints.length > 0) {
+            const edges = [];
+            let totalEdgeLength = 0;
+            for (let i = 0; i < polygonPoints.length; i++) {
+                const next = polygonPoints[(i + 1) % polygonPoints.length];
+                const length = Math.hypot(next.x - polygonPoints[i].x, next.y - polygonPoints[i].y) / 100;
+                const combination = this.calculateOptimalBeamCombination(length);
+                edges.push({
+                    edgeType: `${length.toFixed(2)}m Kenar`,
+                    length: length,
+                    count: 2,
+                    combination: combination,
+                    totalLength: length * 2
+                });
+                totalEdgeLength += length * 2;
+            }
+            return {
+                edges: edges,
+                totalEdgeBeams: edges.length * 2,
+                totalEdgeLength: totalEdgeLength
+            };
+        }
+
         // Kenar uzunlukları
         const topBottomLength = areaWidth; // Üst ve alt kenarlar
         const leftRightLength = areaHeight; // Sol ve sağ kenarlar
 
         // Benzersiz kenar uzunluklarını grupla
         const uniqueEdges = [];
-        
+
         // Üst-Alt kenarlar (eğer farklıysa ayrı ekle)
         const topBottomCombination = this.calculateOptimalBeamCombination(topBottomLength);
         uniqueEdges.push({
@@ -754,17 +799,40 @@ class PanelPlacementApp {
         return results;
     }
 
-    // 40x250cm kalıp panel hesaplama - 4 kenar için doğru hesaplama
-    calculateFormPanels(areaWidth, areaHeight) {
+    // 40x250cm kalıp panel hesaplama
+    calculateFormPanels(areaWidth, areaHeight, polygonPoints = []) {
         const panels = [];
-        
+
+        if (polygonPoints && polygonPoints.length > 0) {
+            let totalPanels = 0;
+            for (let i = 0; i < polygonPoints.length; i++) {
+                const next = polygonPoints[(i + 1) % polygonPoints.length];
+                const lengthM = Math.hypot(next.x - polygonPoints[i].x, next.y - polygonPoints[i].y) / 100;
+                const panelsPerEdge = Math.floor(lengthM / 2.5);
+                const edgePanels = panelsPerEdge * 2;
+                if (edgePanels > 0) {
+                    panels.push({
+                        direction: `${lengthM.toFixed(2)}m Kenar`,
+                        length: lengthM,
+                        panelCount: edgePanels,
+                        panelSize: "40x250cm",
+                        edgeCount: 1,
+                        panelsPerEdge: panelsPerEdge,
+                        totalArea: (edgePanels * 0.4 * 2.5).toFixed(2)
+                    });
+                    totalPanels += edgePanels;
+                }
+            }
+            return { panels, totalPanels, summary: { grandTotal: totalPanels } };
+        }
+
         // Her kenar 250cm'den büyükse kalıp gerekir
         // 250cm = 2.5m, her 2.5m için 1 kalıp, 4 kenar var
-        
+
         // Genişlik kenarları (üst ve alt) - 2 kenar
         const widthPanelsPerEdge = Math.floor(areaWidth / 2.5); // Her kenar için kalıp sayısı (sadece sığanlar)
         const totalWidthPanels = widthPanelsPerEdge * 2; // 2 kenar (üst-alt)
-        
+
         if (widthPanelsPerEdge > 0) {
             panels.push({
                 direction: "Genişlik Kenarları (Üst-Alt)",
@@ -776,26 +844,26 @@ class PanelPlacementApp {
                 totalArea: (totalWidthPanels * 0.4 * 2.5).toFixed(2)
             });
         }
-        
-        // Yükseklik kenarları (sol ve sağ) - 2 kenar  
+
+        // Yükseklik kenarları (sol ve sağ) - 2 kenar
         const heightPanelsPerEdge = Math.floor(areaHeight / 2.5); // Her kenar için kalıp sayısı (sadece sığanlar)
         const totalHeightPanels = heightPanelsPerEdge * 2; // 2 kenar (sol-sağ)
-        
+
         if (heightPanelsPerEdge > 0) {
             panels.push({
                 direction: "Yükseklik Kenarları (Sol-Sağ)",
                 length: areaHeight,
                 panelCount: totalHeightPanels,
-                panelSize: "40x250cm", 
+                panelSize: "40x250cm",
                 edgeCount: 2,
                 panelsPerEdge: heightPanelsPerEdge,
                 totalArea: (totalHeightPanels * 0.4 * 2.5).toFixed(2)
             });
         }
-        
+
         // Toplam kalıp sayısı
         const totalPanels = totalWidthPanels + totalHeightPanels;
-        
+
         return {
             panels,
             totalPanels,
@@ -806,7 +874,7 @@ class PanelPlacementApp {
                     totalPanels: totalWidthPanels
                 },
                 heightEdges: {
-                    length: areaHeight, 
+                    length: areaHeight,
                     panelsPerEdge: heightPanelsPerEdge,
                     totalPanels: totalHeightPanels
                 },
