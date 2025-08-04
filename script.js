@@ -198,6 +198,23 @@ class PanelPlacementApp {
             this.elements.numericArea.style.display = 'none';
             this.elements.polygonDrawing.style.display = '';
         } else {
+            if (this.polygonPoints.length > 0) {
+                const confirmReset = confirm('Çokgen çizimi temizlenecek. Devam etmek istiyor musunuz?');
+                if (!confirmReset) {
+                    this.elements.modeDrawing.checked = true;
+                    this.elements.modeNumeric.checked = false;
+                    this.elements.numericArea.style.display = 'none';
+                    this.elements.polygonDrawing.style.display = '';
+                    return;
+                }
+                this.polygonPoints = [];
+                this.polygonArea = 0;
+                if (this.polygonCtx) {
+                    this.polygonCtx.clearRect(0, 0, this.polygonCanvas.width, this.polygonCanvas.height);
+                }
+                this.elements.segmentInfo.textContent = '';
+                this.elements.confirmPolygonBtn.style.display = 'none';
+            }
             this.elements.numericArea.style.display = '';
             this.elements.polygonDrawing.style.display = 'none';
         }
@@ -416,10 +433,12 @@ class PanelPlacementApp {
             return;
         }
 
+        const areaWidthVal = this.elements.areaWidth.value;
+        const areaHeightVal = this.elements.areaHeight.value;
         const polygonDefined = this.polygonPoints && this.polygonPoints.length > 0;
 
-        const areaWidth = parseFloat(this.elements.areaWidth.value);
-        const areaHeight = parseFloat(this.elements.areaHeight.value);
+        let areaWidth = polygonDefined ? null : parseFloat(areaWidthVal);
+        let areaHeight = polygonDefined ? null : parseFloat(areaHeightVal);
 
         if (!polygonDefined) {
             if (!areaWidth || !areaHeight || areaWidth <= 0 || areaHeight <= 0) {
