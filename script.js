@@ -5,6 +5,8 @@ class PanelPlacementApp {
         this.placedPanels = [];
         this.canvas = null;
         this.ctx = null;
+        this.polygonPoints = [];
+        this.polygonArea = 0;
         this.colors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
             '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
@@ -37,7 +39,12 @@ class PanelPlacementApp {
             panelDetailsList: document.getElementById('panelDetailsList'),
             visualizationCanvas: document.getElementById('visualizationCanvas'),
             exportBtn: document.getElementById('exportBtn'),
-            toast: document.getElementById('toast')
+            toast: document.getElementById('toast'),
+            polygonCanvas: document.getElementById('polygonCanvas'),
+            addPointBtn: document.getElementById('addPointBtn'),
+            finishDrawingBtn: document.getElementById('finishDrawingBtn'),
+            confirmPolygonBtn: document.getElementById('confirmPolygonBtn'),
+            segmentInfo: document.getElementById('segmentInfo')
         };
 
         // Event listener'ları ekle
@@ -67,6 +74,80 @@ class PanelPlacementApp {
         // Canvas'ı ayarla
         this.canvas = this.elements.visualizationCanvas;
         this.ctx = this.canvas.getContext('2d');
+
+        this.initPolygonDrawing();
+    }
+
+    initPolygonDrawing() {
+        this.polygonCanvas = this.elements.polygonCanvas;
+        if (!this.polygonCanvas) return;
+        this.polygonCtx = this.polygonCanvas.getContext('2d');
+        this.isDrawingPolygon = false;
+
+        this.elements.addPointBtn.addEventListener('click', () => {
+            this.isDrawingPolygon = true;
+        });
+
+        this.elements.finishDrawingBtn.addEventListener('click', () => {
+            this.closePolygon();
+        });
+
+        this.elements.confirmPolygonBtn.addEventListener('click', () => {
+            this.calculatePolygonArea();
+        });
+
+        this.polygonCanvas.addEventListener('click', (e) => {
+            if (!this.isDrawingPolygon) return;
+            const rect = this.polygonCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            this.addPolygonPoint(x, y);
+        });
+    }
+
+    addPolygonPoint(x, y) {
+        this.polygonPoints.push({ x, y });
+        const pts = this.polygonPoints;
+        const len = pts.length;
+        if (len > 1) {
+            const prev = pts[len - 2];
+            this.polygonCtx.beginPath();
+            this.polygonCtx.moveTo(prev.x, prev.y);
+            this.polygonCtx.lineTo(x, y);
+            this.polygonCtx.stroke();
+            const segLen = Math.hypot(x - prev.x, y - prev.y);
+            this.elements.segmentInfo.textContent = `Uzunluk: ${segLen.toFixed(2)} px`;
+        }
+        if (len > 2) {
+            const first = pts[0];
+            if (Math.hypot(x - first.x, y - first.y) < 5) {
+                this.closePolygon();
+            }
+        }
+    }
+
+    closePolygon() {
+        if (this.polygonPoints.length < 3) return;
+        const pts = this.polygonPoints;
+        const first = pts[0];
+        const last = pts[pts.length - 1];
+        this.polygonCtx.beginPath();
+        this.polygonCtx.moveTo(last.x, last.y);
+        this.polygonCtx.lineTo(first.x, first.y);
+        this.polygonCtx.stroke();
+        this.isDrawingPolygon = false;
+        this.elements.confirmPolygonBtn.style.display = 'inline-block';
+    }
+
+    calculatePolygonArea() {
+        let area = 0;
+        const pts = this.polygonPoints;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+            area += (pts[j].x + pts[i].x) * (pts[j].y - pts[i].y);
+        }
+        this.polygonArea = Math.abs(area / 2);
+        this.elements.segmentInfo.textContent = `Alan: ${this.polygonArea.toFixed(2)} px²`;
+        this.elements.confirmPolygonBtn.style.display = 'none';
     }
 
     // Panel ekleme fonksiyonu

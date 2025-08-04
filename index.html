@@ -62,6 +62,16 @@
                         <i class="fas fa-calculator"></i> Yerleştirmeyi Hesapla
                     </button>
                 </div>
+
+                <div class="polygon-drawing">
+                    <div class="drawing-controls">
+                        <button id="addPointBtn" class="btn btn-secondary">Nokta Ekle</button>
+                        <button id="finishDrawingBtn" class="btn btn-secondary">Çizimi Bitir</button>
+                        <button id="confirmPolygonBtn" class="btn btn-primary" style="display: none;">Tamam</button>
+                        <div id="segmentInfo" class="segment-info"></div>
+                    </div>
+                    <canvas id="polygonCanvas" width="400" height="400"></canvas>
+                </div>
             </section>
 
             <!-- Sonuçlar Bölümü -->
