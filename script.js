@@ -95,7 +95,9 @@ class PanelPlacementApp {
         });
 
         this.elements.confirmPolygonBtn.addEventListener('click', () => {
-            this.calculatePolygonArea();
+            this.polygonArea = this.calculatePolygonArea(this.polygonPoints);
+            this.elements.segmentInfo.textContent = `Alan: ${this.polygonArea.toFixed(2)} px²`;
+            this.elements.confirmPolygonBtn.style.display = 'none';
         });
 
         this.polygonCanvas.addEventListener('click', (e) => {
@@ -141,16 +143,6 @@ class PanelPlacementApp {
         this.elements.confirmPolygonBtn.style.display = 'inline-block';
     }
 
-    calculatePolygonArea() {
-        let area = 0;
-        const pts = this.polygonPoints;
-        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-            area += (pts[j].x + pts[i].x) * (pts[j].y - pts[i].y);
-        }
-        this.polygonArea = Math.abs(area / 2);
-        this.elements.segmentInfo.textContent = `Alan: ${this.polygonArea.toFixed(2)} px²`;
-        this.elements.confirmPolygonBtn.style.display = 'none';
-    }
 
     // Panel ekleme fonksiyonu
     addPanel() {
