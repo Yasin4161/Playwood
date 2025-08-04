@@ -453,15 +453,8 @@ class PanelPlacementApp {
         const areaHeightVal = this.elements.areaHeight.value;
         const polygonDefined = this.polygonPoints && this.polygonPoints.length > 0;
 
- codex/update-calculateplacement-for-area-values
         let areaWidth = polygonDefined ? null : parseFloat(areaWidthVal);
         let areaHeight = polygonDefined ? null : parseFloat(areaHeightVal);
-
-        const areaWidthVal = this.elements.areaWidth.value;
-        const areaHeightVal = this.elements.areaHeight.value;
-        const areaWidth = polygonDefined ? null : parseFloat(areaWidthVal);
-        const areaHeight = polygonDefined ? null : parseFloat(areaHeightVal);
- main
 
         if (!polygonDefined) {
             if (!areaWidthVal || !areaHeightVal || areaWidth <= 0 || areaHeight <= 0) {
