@@ -53,7 +53,9 @@ class PanelPlacementApp {
             confirmPolygonBtn: document.getElementById('confirmPolygonBtn'),
             autoScaleBtn: document.getElementById('autoScaleBtn'),
             segmentInfo: document.getElementById('segmentInfo'),
-            drawingScale: document.getElementById('drawingScale')
+            drawingScale: document.getElementById('drawingScale'),
+            knownEdge: document.getElementById('knownEdge'),
+            knownArea: document.getElementById('knownArea')
         };
 
         // Event listener'ları ekle
@@ -239,22 +241,53 @@ class PanelPlacementApp {
     autoCalculateScale() {
         const widthM = parseFloat(this.elements.areaWidth.value);
         const heightM = parseFloat(this.elements.areaHeight.value);
-        if (!widthM || !heightM) {
-            this.showToast('Alan ölçülerini girin!', 'error');
+        const knownEdge = parseFloat(this.elements.knownEdge?.value);
+        const knownArea = parseFloat(this.elements.knownArea?.value);
+
+        // Dikdörtgen modunda her iki ölçü de gerekli
+        if (this.polygonPoints.length === 0) {
+            if (!widthM || !heightM) {
+                this.showToast('Alan ölçülerini girin!', 'error');
+                return;
+            }
+            const pixelWidth = this.polygonCanvas.width;
+            const pixelHeight = this.polygonCanvas.height;
+            const scaleX = (widthM * 100) / pixelWidth;
+            const scaleY = (heightM * 100) / pixelHeight;
+            const scale = (scaleX + scaleY) / 2;
+            this.scaleFactor = scale;
+            this.elements.drawingScale.value = scale.toFixed(2);
+            this.showToast('Ölçek hesaplandı!', 'success');
             return;
         }
-        let pixelWidth, pixelHeight;
-        if (this.polygonPoints.length > 1) {
-            const bounds = this.getPolygonBounds(this.polygonPoints);
-            pixelWidth = bounds.width;
-            pixelHeight = bounds.height;
-        } else {
-            pixelWidth = this.polygonCanvas.width;
-            pixelHeight = this.polygonCanvas.height;
+
+        const scales = [];
+        const bounds = this.getPolygonBounds(this.polygonPoints);
+
+        if (widthM) {
+            scales.push((widthM * 100) / bounds.width);
         }
-        const scaleX = (widthM * 100) / pixelWidth;
-        const scaleY = (heightM * 100) / pixelHeight;
-        const scale = (scaleX + scaleY) / 2;
+        if (heightM) {
+            scales.push((heightM * 100) / bounds.height);
+        }
+        if (knownEdge && this.polygonPoints.length >= 2) {
+            const firstEdgePx = Math.hypot(
+                this.polygonPoints[1].x - this.polygonPoints[0].x,
+                this.polygonPoints[1].y - this.polygonPoints[0].y
+            );
+            scales.push((knownEdge * 100) / firstEdgePx);
+        }
+        if (knownArea) {
+            const pixelArea = this.calculatePolygonArea(this.polygonPoints);
+            scales.push(Math.sqrt((knownArea * 10000) / pixelArea));
+        }
+
+        if (scales.length === 0) {
+            this.showToast('Ölçek için en az bir kenar uzunluğu girmelisiniz', 'error');
+            return;
+        }
+
+        const scale = scales.reduce((sum, val) => sum + val, 0) / scales.length;
         this.scaleFactor = scale;
         this.elements.drawingScale.value = scale.toFixed(2);
         this.showToast('Ölçek hesaplandı!', 'success');
