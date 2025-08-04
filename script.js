@@ -34,6 +34,7 @@ class PanelPlacementApp {
             areaHeight: document.getElementById('areaHeight'),
             allowRotation: document.getElementById('allowRotation'),
             calculateBtn: document.getElementById('calculateBtn'),
+            resetPolygonBtn: document.getElementById('resetPolygonBtn'),
             modeNumeric: document.getElementById('modeNumeric'),
             modeDrawing: document.getElementById('modeDrawing'),
             numericArea: document.querySelector('.numeric-area'),
@@ -61,6 +62,14 @@ class PanelPlacementApp {
         // Event listener'ları ekle
         this.elements.addPanelBtn.addEventListener('click', () => this.addPanel());
         this.elements.calculateBtn.addEventListener('click', () => this.calculatePlacement());
+        this.elements.resetPolygonBtn.addEventListener('click', () => {
+            this.polygonPoints = [];
+            if (this.polygonCtx) {
+                this.polygonCtx.clearRect(0, 0, this.polygonCanvas.width, this.polygonCanvas.height);
+            }
+            this.showToast('Çizim sıfırlandı!', 'success');
+            this.toggleAreaMode();
+        });
         this.elements.exportBtn.addEventListener('click', () => this.exportCanvas());
         this.elements.autoScaleBtn.addEventListener('click', () => this.autoCalculateScale());
         this.elements.drawingScale.addEventListener('input', () => {
@@ -197,6 +206,7 @@ class PanelPlacementApp {
         if (this.elements.modeDrawing.checked) {
             this.elements.numericArea.style.display = 'none';
             this.elements.polygonDrawing.style.display = '';
+            this.elements.resetPolygonBtn.style.display = 'none';
         } else {
             if (this.polygonPoints.length > 0) {
                 const confirmReset = confirm('Çokgen çizimi temizlenecek. Devam etmek istiyor musunuz?');
@@ -217,6 +227,12 @@ class PanelPlacementApp {
             }
             this.elements.numericArea.style.display = '';
             this.elements.polygonDrawing.style.display = 'none';
+            if (this.polygonPoints.length > 0) {
+                this.elements.resetPolygonBtn.style.display = '';
+                this.showToast('Çizim mevcut. Sayısal giriş için önce çizimi sıfırlayın.', 'warning');
+            } else {
+                this.elements.resetPolygonBtn.style.display = 'none';
+            }
         }
     }
 
@@ -437,11 +453,18 @@ class PanelPlacementApp {
         const areaHeightVal = this.elements.areaHeight.value;
         const polygonDefined = this.polygonPoints && this.polygonPoints.length > 0;
 
+ codex/update-calculateplacement-for-area-values
         let areaWidth = polygonDefined ? null : parseFloat(areaWidthVal);
         let areaHeight = polygonDefined ? null : parseFloat(areaHeightVal);
 
+        const areaWidthVal = this.elements.areaWidth.value;
+        const areaHeightVal = this.elements.areaHeight.value;
+        const areaWidth = polygonDefined ? null : parseFloat(areaWidthVal);
+        const areaHeight = polygonDefined ? null : parseFloat(areaHeightVal);
+ main
+
         if (!polygonDefined) {
-            if (!areaWidth || !areaHeight || areaWidth <= 0 || areaHeight <= 0) {
+            if (!areaWidthVal || !areaHeightVal || areaWidth <= 0 || areaHeight <= 0) {
                 this.showToast('Lütfen geçerli alan boyutları girin!', 'error');
                 return;
             }
