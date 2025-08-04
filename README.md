@@ -1,50 +1,80 @@
-# İnşaat Kalıp Yerleştirme - Construction Panel Placement Tool
+İnşaat Kalıp Yerleştirme Aracı (Construction Panel Placement Tool)
 
-## Overview
+Genel Bakış
 
-This is a Turkish construction panel placement optimization tool that helps construction professionals efficiently arrange form panels (kalıp panelleri) within designated construction areas. The application calculates optimal panel positioning using bin packing algorithms and provides visual feedback through canvas-based diagrams. Users can input panel dimensions, specify construction area constraints, and receive placement recommendations with efficiency metrics and exportable visualizations.
+Bu araç, Türkçe olarak sunulan bir kalıp yerleştirme optimizasyon sistemidir. İnşaat profesyonellerine, belirli inşaat alanları içerisinde kalıp panellerini en verimli şekilde yerleştirme konusunda yardımcı olur. Uygulama, bin-packing (kutu yerleştirme) algoritmaları kullanarak panel yerleşimini optimize eder ve yerleşim sonuçlarını tuval (canvas) üzerinde görsel olarak sunar. Kullanıcılar, panel boyutlarını ve alan kısıtlamalarını girerek, verimlilik metrikleri ve dışa aktarılabilir görselleştirmelerle birlikte yerleşim önerileri alabilir.
 
-## User Preferences
+Kullanıcı Tercihleri
 
-Preferred communication style: Simple, everyday language.
+Tercih edilen iletişim biçimi: Basit ve günlük Türkçe.
 
-## System Architecture
+Sistem Mimarisi
 
-### Frontend Architecture
-- **Single Page Application (SPA)**: Built entirely with vanilla HTML, CSS, and JavaScript without framework dependencies for maximum portability and minimal overhead
-- **Class-based JavaScript Architecture**: Uses ES6 class structure (`PanelPlacementApp`) to encapsulate state management, DOM manipulation, and business logic
-- **Canvas-based Visualization System**: Leverages HTML5 Canvas API for real-time rendering of panel placements with color-coded visual feedback
-- **Responsive CSS Grid Layout**: Mobile-first design using CSS Grid and Flexbox for adaptive user interface across devices
-- **Client-side Data Persistence**: Browser localStorage implementation for maintaining panel configurations between user sessions
+Ön Yüz (Frontend) Mimarisi
 
-### Core Algorithm Components
-- **Bin Packing Algorithm**: Implements optimal panel placement calculations to maximize area utilization within construction site constraints
-- **Panel Management System**: Handles dynamic addition, removal, and validation of panel dimensions with real-time UI updates
-- **Placement Optimization Engine**: Calculates efficiency metrics, remaining area calculations, and placement feasibility analysis
-- **Visual Rendering Engine**: Canvas-based drawing system with predefined color palette for panel differentiation and area representation
+Tek Sayfa Uygulaması (SPA): Uygulama, maksimum taşınabilirlik ve düşük sistem yükü sağlamak amacıyla yalnızca saf HTML, CSS ve JavaScript kullanılarak geliştirilmiştir. Herhangi bir framework (çatı) bağımlılığı bulunmamaktadır.
 
-### User Interface Patterns
-- **Progressive Workflow Design**: Step-by-step interface guiding users from panel input through area specification to calculation results
-- **Real-time Validation System**: Immediate feedback for input validation and constraint checking
-- **Toast Notification Framework**: Non-intrusive user feedback system for actions, errors, and success states
-- **Empty State Management**: Clear messaging and visual cues when no data is present in each application section
+Sınıf Tabanlı JavaScript Mimarisi: PanelPlacementApp adlı ES6 sınıf yapısı, uygulama durumunun yönetimi, kullanıcı arayüzü etkileşimi ve iş mantığını kapsayacak şekilde tasarlanmıştır.
 
-### Data Management
-- **In-memory State Management**: JavaScript arrays maintaining panel definitions and placement results
-- **Color Assignment System**: Automatic color allocation from predefined palette for visual panel identification
-- **Export Functionality**: Canvas-to-image conversion enabling users to save placement diagrams for documentation
+Canvas Tabanlı Görselleştirme Sistemi: HTML5 Canvas API kullanılarak, gerçek zamanlı renk kodlu panel yerleşim görselleri oluşturulmaktadır.
 
-## External Dependencies
+Duyarlı (Responsive) CSS Izgara Yerleşimi: CSS Grid ve Flexbox kullanılarak mobil öncelikli, tüm cihazlara uyumlu arayüz tasarımı yapılmıştır.
 
-### CDN Resources
-- **Font Awesome 6.0.0**: Icon library providing construction-themed UI elements and visual enhancement (`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css`)
+İstemci Taraflı Veri Saklama: Tarayıcıya ait localStorage sistemi ile panel konfigürasyonları oturumlar arasında saklanır.
 
-### Browser APIs
-- **HTML5 Canvas API**: Core rendering and drawing functionality for visualization components
-- **Web Storage API (localStorage)**: Client-side data persistence for panel configurations
-- **File API**: Canvas export capabilities for saving placement diagrams as downloadable images
 
-### Architecture Benefits
-- **Zero Server Dependencies**: Complete client-side operation eliminates hosting requirements and enables offline functionality
-- **Framework Independence**: Vanilla JavaScript approach ensures long-term maintainability and minimal technical debt
-- **Mobile Compatibility**: Responsive design patterns support field use on construction sites via mobile devices
+Temel Algoritma Bileşenleri
+
+Bin Packing Algoritması: İnşaat alanı sınırları içerisinde alan kullanımını en üst düzeye çıkaracak şekilde panel yerleşim hesaplamalarını gerçekleştirir.
+
+Panel Yönetim Sistemi: Panel boyutlarının dinamik olarak eklenmesi, silinmesi ve doğrulanması işlemlerini gerçek zamanlı olarak yürütür.
+
+Yerleşim Optimizasyon Motoru: Verimlilik hesapları, kalan alan analizi ve yerleşim uygunluk kontrollerini gerçekleştirir.
+
+Görsel Çizim Motoru: Belirlenmiş renk paletleriyle panel ayrımını sağlayan, alanı temsil eden çizimleri canvas üzerinde üretir.
+
+
+Kullanıcı Arayüzü Tasarımı
+
+Adım Adım İş Akışı: Kullanıcıyı panel girişi, alan tanımlaması ve hesaplama sonuçlarına kadar yönlendiren yapıdadır.
+
+Gerçek Zamanlı Doğrulama Sistemi: Kullanıcı girişleri ve kısıtlamalar anında kontrol edilerek geri bildirim sağlanır.
+
+Toast Bildirim Sistemi: İşlemler, hatalar ve başarı durumları için rahatsız etmeyen geri bildirim mesajları sağlar.
+
+Boş Durum Yönetimi: Her bölümde veri bulunmadığında, kullanıcıya açıklayıcı mesajlar ve görsel ipuçları gösterilir.
+
+
+Veri Yönetimi
+
+Bellek Üzerinde Durum Yönetimi: Panel tanımları ve yerleşim sonuçları JavaScript dizileri ile bellekte tutulur.
+
+Renk Atama Sistemi: Panelleri görsel olarak ayırt etmek için önceden belirlenmiş bir renk paletinden otomatik olarak renk atanır.
+
+Dışa Aktarım Özelliği: Yerleşim diyagramları, canvas’tan görsele dönüştürülerek indirilebilir görseller halinde kaydedilebilir.
+
+
+Harici Bağımlılıklar
+
+CDN Kaynakları
+
+Font Awesome 6.0.0: İnşaat temalı kullanıcı arayüzü ikonlarını ve görsel iyileştirmeleri sağlayan ikon kütüphanesi
+https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css
+
+
+Tarayıcı API’leri
+
+HTML5 Canvas API: Görselleştirme bileşenlerinin çizimi ve render işlemleri için temel işlevleri sağlar.
+
+Web Storage API (localStorage): Panel konfigürasyonlarının istemci tarafında saklanmasını sağlar.
+
+File API: Yerleşim görsellerinin indirilebilir biçime dönüştürülmesini sağlar.
+
+
+Mimari Avantajlar
+
+Sunucu Gereksinimi Yok: Uygulama tamamen istemci tarafında çalışır, bu sayede barındırma (hosting) ihtiyacını ortadan kaldırır ve çevrimdışı (offline) kullanım imkânı sunar.
+
+Framework Bağımsızlığı: Saf JavaScript yaklaşımı sayesinde uzun vadeli sürdürülebilirlik ve düşük teknik borç sağlanır.
+
+Mobil Uyumlu Tasarım: Sahada kullanım kolaylığı için mobil cihazlarla uyumlu, duyarlı kullanıcı arayüzü sunar.
