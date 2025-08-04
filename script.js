@@ -172,7 +172,12 @@ class PanelPlacementApp {
         this.polygonPoints.push({ x, y });
         const pts = this.polygonPoints;
         const len = pts.length;
+        // Re-draw existing polygon to remove any guide lines
         this.redrawPolygon();
+        // Draw a small marker for the newly added point so the first point is visible
+        this.polygonCtx.beginPath();
+        this.polygonCtx.arc(x, y, 3, 0, Math.PI * 2);
+        this.polygonCtx.fill();
         if (len > 1) {
             const prev = pts[len - 2];
             const segLen = Math.hypot(x - prev.x, y - prev.y);
