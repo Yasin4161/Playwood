@@ -157,6 +157,26 @@ input[type="number"]:focus {
     box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
 }
 
+/* Polygon Drawing */
+.polygon-drawing canvas {
+    width: 100%;
+    height: auto;
+}
+
+.drawing-controls {
+    display: flex;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .drawing-controls {
+        flex-direction: column;
+    }
+    .drawing-controls .btn {
+        width: 100%;
+    }
+}
+
 /* Panel Liste */
 .panels-list {
     margin-top: 20px;
