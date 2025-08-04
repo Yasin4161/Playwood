@@ -83,6 +83,14 @@ class PanelPlacementApp {
     initPolygonDrawing() {
         this.polygonCanvas = this.elements.polygonCanvas;
         if (!this.polygonCanvas) return;
+        const setCanvasSize = () => {
+            const width = this.polygonCanvas.clientWidth;
+            this.polygonCanvas.width = width;
+            this.polygonCanvas.height = width;
+        };
+        setCanvasSize();
+        window.addEventListener('resize', setCanvasSize);
+
         this.polygonCtx = this.polygonCanvas.getContext('2d');
         this.isDrawingPolygon = false;
 
