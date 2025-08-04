@@ -47,6 +47,7 @@ class PanelPlacementApp {
             addPointBtn: document.getElementById('addPointBtn'),
             finishDrawingBtn: document.getElementById('finishDrawingBtn'),
             confirmPolygonBtn: document.getElementById('confirmPolygonBtn'),
+            autoScaleBtn: document.getElementById('autoScaleBtn'),
             segmentInfo: document.getElementById('segmentInfo'),
             drawingScale: document.getElementById('drawingScale')
         };
@@ -55,6 +56,11 @@ class PanelPlacementApp {
         this.elements.addPanelBtn.addEventListener('click', () => this.addPanel());
         this.elements.calculateBtn.addEventListener('click', () => this.calculatePlacement());
         this.elements.exportBtn.addEventListener('click', () => this.exportCanvas());
+        this.elements.autoScaleBtn.addEventListener('click', () => this.autoCalculateScale());
+        this.elements.drawingScale.addEventListener('input', () => {
+            const val = parseFloat(this.elements.drawingScale.value);
+            if (val > 0) this.scaleFactor = val;
+        });
 
         // Enter tuşu ile panel ekleme
         this.elements.panelWidth.addEventListener('keypress', (e) => {
@@ -107,7 +113,7 @@ class PanelPlacementApp {
         });
 
         this.elements.confirmPolygonBtn.addEventListener('click', () => {
-            const scale = parseFloat(this.elements.drawingScale.value) || 1;
+            const scale = parseFloat(this.elements.drawingScale.value) || this.scaleFactor || 1;
             this.scaleFactor = scale;
             this.polygonPoints = this.polygonPoints.map(p => ({ x: p.x * scale, y: p.y * scale }));
             this.polygonArea = this.calculatePolygonArea(this.polygonPoints);
@@ -136,8 +142,9 @@ class PanelPlacementApp {
             this.polygonCtx.strokeStyle = '#888';
             this.polygonCtx.stroke();
             this.polygonCtx.strokeStyle = '#000';
-            const segLen = Math.hypot(x - last.x, y - last.y);
-            this.elements.segmentInfo.textContent = `Uzunluk: ${segLen.toFixed(2)} px`;
+            const segLenPx = Math.hypot(x - last.x, y - last.y);
+            const segLenM = (segLenPx * (parseFloat(this.elements.drawingScale.value) || this.scaleFactor || 1)) / 100;
+            this.elements.segmentInfo.textContent = `Uzunluk: ${segLenM.toFixed(2)} m`;
         });
     }
 
@@ -187,8 +194,9 @@ class PanelPlacementApp {
         this.polygonCtx.fill();
         if (len > 1) {
             const prev = pts[len - 2];
-            const segLen = Math.hypot(x - prev.x, y - prev.y);
-            this.elements.segmentInfo.textContent = `Uzunluk: ${segLen.toFixed(2)} px`;
+            const segLenPx = Math.hypot(x - prev.x, y - prev.y);
+            const segLenM = (segLenPx * (parseFloat(this.elements.drawingScale.value) || this.scaleFactor || 1)) / 100;
+            this.elements.segmentInfo.textContent = `Uzunluk: ${segLenM.toFixed(2)} m`;
         }
         if (len > 2) {
             const first = pts[0];
@@ -202,7 +210,35 @@ class PanelPlacementApp {
         if (this.polygonPoints.length < 3) return;
         this.redrawPolygon(true);
         this.isDrawingPolygon = false;
+        const scale = parseFloat(this.elements.drawingScale.value) || this.scaleFactor || 1;
+        const scaledPts = this.polygonPoints.map(p => ({ x: p.x * scale, y: p.y * scale }));
+        const areaCm2 = this.calculatePolygonArea(scaledPts);
+        this.elements.segmentInfo.textContent = `Alan: ${(areaCm2 / 10000).toFixed(2)} m²`;
         this.elements.confirmPolygonBtn.style.display = 'inline-block';
+    }
+
+    autoCalculateScale() {
+        const widthM = parseFloat(this.elements.areaWidth.value);
+        const heightM = parseFloat(this.elements.areaHeight.value);
+        if (!widthM || !heightM) {
+            this.showToast('Alan ölçülerini girin!', 'error');
+            return;
+        }
+        let pixelWidth, pixelHeight;
+        if (this.polygonPoints.length > 1) {
+            const bounds = this.getPolygonBounds(this.polygonPoints);
+            pixelWidth = bounds.width;
+            pixelHeight = bounds.height;
+        } else {
+            pixelWidth = this.polygonCanvas.width;
+            pixelHeight = this.polygonCanvas.height;
+        }
+        const scaleX = (widthM * 100) / pixelWidth;
+        const scaleY = (heightM * 100) / pixelHeight;
+        const scale = (scaleX + scaleY) / 2;
+        this.scaleFactor = scale;
+        this.elements.drawingScale.value = scale.toFixed(2);
+        this.showToast('Ölçek hesaplandı!', 'success');
     }
 
 

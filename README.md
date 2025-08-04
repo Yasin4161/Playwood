@@ -58,13 +58,16 @@ Kullanıcılar:
 
 ### 🧭 Arayüz Özellikleri
 
-- **🚶‍♂️ Adım Adım Kullanım Akışı**  
+- **🚶‍♂️ Adım Adım Kullanım Akışı**
   Panel girişinden sonuçlara kadar yönlendirici yapı.
 
-- **✅ Gerçek Zamanlı Doğrulama**  
+- **✅ Gerçek Zamanlı Doğrulama**
   Hatalı girişler anında kullanıcıya bildirilir.
 
-- **🔔 Toast Bildirim Sistemi**  
+- **📏 Ölçekli Çizim Desteği**
+  Piksel ölçüleri gerçek metre ve m² değerlerine dönüştürülür. Ölçek kullanıcı tarafından girilebilir veya alan ölçülerinden otomatik hesaplanabilir.
+
+- **🔔 Toast Bildirim Sistemi**
   Başarılı işlemler, hatalar vb. için rahatsız etmeyen bildirimler.
 
 - **📭 Boş Durum Yönetimi**  
