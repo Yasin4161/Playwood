@@ -205,6 +205,9 @@ class PanelPlacementApp {
             '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
             '#10AC84', '#EE5A24', '#0C2461', '#1DD1A1', '#FD79A8'
         ];
+
+        // Çokgen alan tanımı (cm cinsinden noktalar)
+        this.polygonPoints = [];
         
         this.init();
         this.loadPanels();
@@ -477,10 +480,22 @@ class PanelPlacementApp {
         // Metre'den cm'ye dönüştür
         const areaCmWidth = areaWidth * 100;
         const areaCmHeight = areaHeight * 100;
-        const totalArea = areaWidth * areaHeight;
+
+        // Çokgen tanımlı değilse dikdörtgen oluştur
+        if (!this.polygonPoints || this.polygonPoints.length === 0) {
+            this.polygonPoints = [
+                { x: 0, y: 0 },
+                { x: areaCmWidth, y: 0 },
+                { x: areaCmWidth, y: areaCmHeight },
+                { x: 0, y: areaCmHeight }
+            ];
+        }
+
+        // Çokgen alanını hesapla (cm² -> m²)
+        const totalArea = this.calculatePolygonArea(this.polygonPoints) / 10000;
 
         // Yerleştirme algoritmasını çalıştır
-        this.placedPanels = this.placePanels(areaCmWidth, areaCmHeight);
+        this.placedPanels = this.placePanels(this.polygonPoints);
 
         // Sonuçları hesapla
         const results = this.calculateResults(totalArea);
@@ -493,7 +508,9 @@ class PanelPlacementApp {
 
         // Sonuçları göster
         this.displayResults(results, beamRequirements, formPanels);
-        this.drawVisualization(areaCmWidth, areaCmHeight);
+
+        const bounds = this.getPolygonBounds(this.polygonPoints);
+        this.drawVisualization(bounds.width, bounds.height);
 
         // Sonuçlar bölümünü göster
         this.elements.resultsSection.style.display = 'block';
@@ -503,16 +520,32 @@ class PanelPlacementApp {
     }
 
     // Panel yerleştirme algoritması
-    placePanels(areaWidth, areaHeight) {
+    placePanels(polygonPoints) {
         const placed = [];
         const allowRotation = this.elements.allowRotation.checked;
 
-        // Panelleri alan büyüklüğüne göre sırala (büyükten küçüğe)
-        const sortedPanels = [...this.panels].sort((a, b) => b.area - a.area);
+        // Çokgenin sınır kutusunu hesapla ve orijine göre kaydır
+        const bounds = this.getPolygonBounds(polygonPoints);
+        const areaWidth = bounds.width;
+        const areaHeight = bounds.height;
+        const polygon = polygonPoints.map(p => ({ x: p.x - bounds.minX, y: p.y - bounds.minY }));
+
+        // Çokgen içindeki kullanılabilir alan maskesi
+        const maskGrid = Array(Math.ceil(areaHeight)).fill(null)
+            .map(() => Array(Math.ceil(areaWidth)).fill(false));
+        for (let y = 0; y < maskGrid.length; y++) {
+            for (let x = 0; x < maskGrid[0].length; x++) {
+                const pt = { x: x + 0.5, y: y + 0.5 };
+                maskGrid[y][x] = this.pointInPolygon(pt, polygon);
+            }
+        }
 
         // Kullanılabilir alanları tutacak grid sistemi
         const occupiedGrid = Array(Math.ceil(areaHeight)).fill(null)
             .map(() => Array(Math.ceil(areaWidth)).fill(false));
+
+        // Panelleri alan büyüklüğüne göre sırala (büyükten küçüğe)
+        const sortedPanels = [...this.panels].sort((a, b) => b.area - a.area);
 
         // Her panel türü için yerleştirme dene
         for (const panel of sortedPanels) {
@@ -524,14 +557,14 @@ class PanelPlacementApp {
                 let bestRotation = false;
 
                 // Normal yönelim dene
-                const normalPos = this.findBestPosition(occupiedGrid, panel.width, panel.height, areaWidth, areaHeight);
+                const normalPos = this.findBestPosition(occupiedGrid, maskGrid, polygon, panel.width, panel.height, areaWidth, areaHeight);
                 if (normalPos) {
                     bestPosition = normalPos;
                 }
 
                 // Döndürülmüş yönelim dene (eğer izin verilmişse ve farklı boyutlarda ise)
                 if (allowRotation && panel.width !== panel.height) {
-                    const rotatedPos = this.findBestPosition(occupiedGrid, panel.height, panel.width, areaWidth, areaHeight);
+                    const rotatedPos = this.findBestPosition(occupiedGrid, maskGrid, polygon, panel.height, panel.width, areaWidth, areaHeight);
                     if (rotatedPos && (!bestPosition || this.isPositionBetter(rotatedPos, bestPosition))) {
                         bestPosition = rotatedPos;
                         bestRotation = true;
@@ -564,11 +597,11 @@ class PanelPlacementApp {
     }
 
     // En iyi pozisyonu bul
-    findBestPosition(occupiedGrid, panelWidth, panelHeight, areaWidth, areaHeight) {
+    findBestPosition(occupiedGrid, maskGrid, polygon, panelWidth, panelHeight, areaWidth, areaHeight) {
         // Sol üstten başlayarak tara
         for (let y = 0; y <= areaHeight - panelHeight; y++) {
             for (let x = 0; x <= areaWidth - panelWidth; x++) {
-                if (this.canPlacePanel(occupiedGrid, x, y, panelWidth, panelHeight)) {
+                if (this.canPlacePanel(occupiedGrid, maskGrid, polygon, x, y, panelWidth, panelHeight)) {
                     return { x, y };
                 }
             }
@@ -577,18 +610,59 @@ class PanelPlacementApp {
     }
 
     // Panel yerleştirilebilir mi kontrol et
-    canPlacePanel(occupiedGrid, x, y, width, height) {
+    canPlacePanel(occupiedGrid, maskGrid, polygon, x, y, width, height) {
         const gridHeight = occupiedGrid.length;
         const gridWidth = occupiedGrid[0].length;
 
         for (let py = Math.floor(y); py < Math.ceil(y + height) && py < gridHeight; py++) {
             for (let px = Math.floor(x); px < Math.ceil(x + width) && px < gridWidth; px++) {
-                if (occupiedGrid[py] && occupiedGrid[py][px]) {
+                if (!maskGrid[py][px] || (occupiedGrid[py] && occupiedGrid[py][px])) {
                     return false;
                 }
             }
         }
-        return true;
+
+        const corners = [
+            { x, y },
+            { x: x + width, y },
+            { x, y: y + height },
+            { x: x + width, y: y + height }
+        ];
+
+        return corners.every(pt => this.pointInPolygon(pt, polygon));
+    }
+
+    // Noktanın çokgen içinde olup olmadığını kontrol et (ray-casting)
+    pointInPolygon(point, polygon) {
+        let inside = false;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            const xi = polygon[i].x, yi = polygon[i].y;
+            const xj = polygon[j].x, yj = polygon[j].y;
+            const intersect = ((yi > point.y) !== (yj > point.y)) &&
+                (point.x < (xj - xi) * (point.y - yi) / ((yj - yi) || 1e-9) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
+    // Çokgenin sınır kutusunu döndür
+    getPolygonBounds(points) {
+        const xs = points.map(p => p.x);
+        const ys = points.map(p => p.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+        return { minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY };
+    }
+
+    // Çokgen alanını hesapla (shoelace formülü)
+    calculatePolygonArea(points) {
+        let area = 0;
+        for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+            area += (points[j].x + points[i].x) * (points[j].y - points[i].y);
+        }
+        return Math.abs(area) / 2;
     }
 
     // Grid'de alanı işgal edilmiş olarak işaretle
