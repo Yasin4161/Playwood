@@ -1,80 +1,124 @@
-İnşaat Kalıp Yerleştirme Aracı (Construction Panel Placement Tool)
+# 🏗️ İnşaat Kalıp Yerleştirme Aracı (Construction Panel Placement Tool)
 
-Genel Bakış
+## 📌 Genel Bakış
 
-Bu araç, Türkçe olarak sunulan bir kalıp yerleştirme optimizasyon sistemidir. İnşaat profesyonellerine, belirli inşaat alanları içerisinde kalıp panellerini en verimli şekilde yerleştirme konusunda yardımcı olur. Uygulama, bin-packing (kutu yerleştirme) algoritmaları kullanarak panel yerleşimini optimize eder ve yerleşim sonuçlarını tuval (canvas) üzerinde görsel olarak sunar. Kullanıcılar, panel boyutlarını ve alan kısıtlamalarını girerek, verimlilik metrikleri ve dışa aktarılabilir görselleştirmelerle birlikte yerleşim önerileri alabilir.
+Bu araç, **inşaat profesyonellerinin** belirli alanlara **kalıp panellerini en verimli şekilde yerleştirmelerine** yardımcı olmak için geliştirilmiştir.  
+🔍 Panel yerleşimi, **bin-packing (kutu yerleştirme) algoritmaları** ile optimize edilir ve sonuçlar **HTML5 Canvas** kullanılarak **görsel olarak** sunulur.  
 
-Kullanıcı Tercihleri
+Kullanıcılar:
+- Panel boyutlarını girebilir
+- İnşaat alanını tanımlayabilir
+- Yerleşim önerilerini, **verimlilik oranları** ile birlikte alabilir
+- Görselleştirmeleri dışa aktarabilir
 
-Tercih edilen iletişim biçimi: Basit ve günlük Türkçe.
+---
 
-Sistem Mimarisi
+## 👤 Kullanıcı Tercihleri
 
-Ön Yüz (Frontend) Mimarisi
+- **Tercih edilen dil:** Basit ve günlük Türkçe
 
-Tek Sayfa Uygulaması (SPA): Uygulama, maksimum taşınabilirlik ve düşük sistem yükü sağlamak amacıyla yalnızca saf HTML, CSS ve JavaScript kullanılarak geliştirilmiştir. Herhangi bir framework (çatı) bağımlılığı bulunmamaktadır.
+---
 
-Sınıf Tabanlı JavaScript Mimarisi: PanelPlacementApp adlı ES6 sınıf yapısı, uygulama durumunun yönetimi, kullanıcı arayüzü etkileşimi ve iş mantığını kapsayacak şekilde tasarlanmıştır.
+## 🧱 Sistem Mimarisi
 
-Canvas Tabanlı Görselleştirme Sistemi: HTML5 Canvas API kullanılarak, gerçek zamanlı renk kodlu panel yerleşim görselleri oluşturulmaktadır.
+### 🎨 Ön Yüz (Frontend) Mimarisi
 
-Duyarlı (Responsive) CSS Izgara Yerleşimi: CSS Grid ve Flexbox kullanılarak mobil öncelikli, tüm cihazlara uyumlu arayüz tasarımı yapılmıştır.
+- **🧩 Tek Sayfa Uygulaması (SPA)**  
+  Framework bağımsız, yalnızca HTML, CSS ve JavaScript ile geliştirildi.
 
-İstemci Taraflı Veri Saklama: Tarayıcıya ait localStorage sistemi ile panel konfigürasyonları oturumlar arasında saklanır.
+- **📦 Sınıf Tabanlı JavaScript Mimarisi**  
+  `PanelPlacementApp` ES6 sınıfı, uygulama durumunu ve iş mantığını kapsar.
 
+- **🖼️ Canvas Tabanlı Görselleştirme Sistemi**  
+  HTML5 Canvas API ile renk kodlu yerleşim diyagramları üretilir.
 
-Temel Algoritma Bileşenleri
+- **📱 Duyarlı (Responsive) Tasarım**  
+  CSS Grid ve Flexbox ile mobil uyumlu arayüz.
 
-Bin Packing Algoritması: İnşaat alanı sınırları içerisinde alan kullanımını en üst düzeye çıkaracak şekilde panel yerleşim hesaplamalarını gerçekleştirir.
+- **💾 Tarayıcı Depolama (localStorage)**  
+  Panel bilgileri tarayıcıda saklanır, oturumlar arası korunur.
 
-Panel Yönetim Sistemi: Panel boyutlarının dinamik olarak eklenmesi, silinmesi ve doğrulanması işlemlerini gerçek zamanlı olarak yürütür.
+---
 
-Yerleşim Optimizasyon Motoru: Verimlilik hesapları, kalan alan analizi ve yerleşim uygunluk kontrollerini gerçekleştirir.
+### 🧠 Temel Algoritmalar
 
-Görsel Çizim Motoru: Belirlenmiş renk paletleriyle panel ayrımını sağlayan, alanı temsil eden çizimleri canvas üzerinde üretir.
+- **📐 Bin Packing Algoritması**  
+  Alanı en verimli kullanacak şekilde panel yerleşimini hesaplar.
 
+- **🛠️ Panel Yönetimi**  
+  Panel ekleme, silme ve doğrulama işlemleri dinamik olarak yapılır.
 
-Kullanıcı Arayüzü Tasarımı
+- **⚙️ Yerleşim Optimizasyon Motoru**  
+  Verimlilik oranı, kalan alan ve yerleşim uygunluğu hesaplanır.
 
-Adım Adım İş Akışı: Kullanıcıyı panel girişi, alan tanımlaması ve hesaplama sonuçlarına kadar yönlendiren yapıdadır.
+- **🖌️ Görsel Çizim Motoru**  
+  Renkli ve net yerleşim diyagramları çizer.
 
-Gerçek Zamanlı Doğrulama Sistemi: Kullanıcı girişleri ve kısıtlamalar anında kontrol edilerek geri bildirim sağlanır.
+---
 
-Toast Bildirim Sistemi: İşlemler, hatalar ve başarı durumları için rahatsız etmeyen geri bildirim mesajları sağlar.
+### 🧭 Arayüz Özellikleri
 
-Boş Durum Yönetimi: Her bölümde veri bulunmadığında, kullanıcıya açıklayıcı mesajlar ve görsel ipuçları gösterilir.
+- **🚶‍♂️ Adım Adım Kullanım Akışı**  
+  Panel girişinden sonuçlara kadar yönlendirici yapı.
 
+- **✅ Gerçek Zamanlı Doğrulama**  
+  Hatalı girişler anında kullanıcıya bildirilir.
 
-Veri Yönetimi
+- **🔔 Toast Bildirim Sistemi**  
+  Başarılı işlemler, hatalar vb. için rahatsız etmeyen bildirimler.
 
-Bellek Üzerinde Durum Yönetimi: Panel tanımları ve yerleşim sonuçları JavaScript dizileri ile bellekte tutulur.
+- **📭 Boş Durum Yönetimi**  
+  Veri olmayan durumlarda açıklayıcı mesajlar ve görseller.
 
-Renk Atama Sistemi: Panelleri görsel olarak ayırt etmek için önceden belirlenmiş bir renk paletinden otomatik olarak renk atanır.
+---
 
-Dışa Aktarım Özelliği: Yerleşim diyagramları, canvas’tan görsele dönüştürülerek indirilebilir görseller halinde kaydedilebilir.
+### 🗃️ Veri Yönetimi
 
+- **🧠 Bellek Üzerinde Durum**  
+  JavaScript dizileri ile panel bilgileri ve sonuçlar saklanır.
 
-Harici Bağımlılıklar
+- **🎨 Renk Atama Sistemi**  
+  Panellerin görsel olarak ayırt edilmesi için otomatik renk atanır.
 
-CDN Kaynakları
+- **📤 Dışa Aktarım Özelliği**  
+  Yerleşim diyagramları indirilebilir görsel olarak kaydedilebilir.
 
-Font Awesome 6.0.0: İnşaat temalı kullanıcı arayüzü ikonlarını ve görsel iyileştirmeleri sağlayan ikon kütüphanesi
-https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css
+---
 
+## 🔗 Harici Bağımlılıklar
 
-Tarayıcı API’leri
+### 🌐 CDN Kaynakları
 
-HTML5 Canvas API: Görselleştirme bileşenlerinin çizimi ve render işlemleri için temel işlevleri sağlar.
+- **Font Awesome 6.0.0**  
+  İnşaat temalı ikonlar:  
+  [`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css`](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css)
 
-Web Storage API (localStorage): Panel konfigürasyonlarının istemci tarafında saklanmasını sağlar.
+---
 
-File API: Yerleşim görsellerinin indirilebilir biçime dönüştürülmesini sağlar.
+### 🧩 Tarayıcı API'leri
 
+- **HTML5 Canvas API** – Görselleştirme motoru  
+- **Web Storage API (localStorage)** – Kullanıcı oturum verisi  
+- **File API** – Yerleşim görselini indirilebilir hale getirme
 
-Mimari Avantajlar
+---
 
-Sunucu Gereksinimi Yok: Uygulama tamamen istemci tarafında çalışır, bu sayede barındırma (hosting) ihtiyacını ortadan kaldırır ve çevrimdışı (offline) kullanım imkânı sunar.
+## 🚀 Mimari Avantajlar
 
-Framework Bağımsızlığı: Saf JavaScript yaklaşımı sayesinde uzun vadeli sürdürülebilirlik ve düşük teknik borç sağlanır.
+- ✅ **Sunucu Gereksinimi Yok**  
+  Tamamen istemci tarafında çalışır, çevrimdışı kullanılabilir.
 
-Mobil Uyumlu Tasarım: Sahada kullanım kolaylığı için mobil cihazlarla uyumlu, duyarlı kullanıcı arayüzü sunar.
+- 🔓 **Framework Bağımsızlığı**  
+  Uzun vadeli sürdürülebilirlik için saf JavaScript mimarisi.
+
+- 📱 **Mobil Uyumlu Kullanım**  
+  Şantiyelerde, mobil cihazlarla kolay erişim ve etkileşim.
+
+---
+
+## 🛠️ Katkıda Bulunmak
+
+Bu proje gelişime açıktır!  
+Sorun bildirmek, iyileştirme önermek veya katkıda bulunmak için lütfen [GitHub Issues](https://github.com/) kısmını kullanın.
+
+---
