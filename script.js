@@ -34,6 +34,10 @@ class PanelPlacementApp {
             areaHeight: document.getElementById('areaHeight'),
             allowRotation: document.getElementById('allowRotation'),
             calculateBtn: document.getElementById('calculateBtn'),
+            modeNumeric: document.getElementById('modeNumeric'),
+            modeDrawing: document.getElementById('modeDrawing'),
+            numericArea: document.querySelector('.numeric-area'),
+            polygonDrawing: document.querySelector('.polygon-drawing'),
             resultsSection: document.getElementById('resultsSection'),
             usedPanelsCount: document.getElementById('usedPanelsCount'),
             remainingArea: document.getElementById('remainingArea'),
@@ -81,11 +85,16 @@ class PanelPlacementApp {
             if (e.key === 'Enter') this.calculatePlacement();
         });
 
+        // Alan modu değişimi
+        this.elements.modeNumeric.addEventListener('change', () => this.toggleAreaMode());
+        this.elements.modeDrawing.addEventListener('change', () => this.toggleAreaMode());
+
         // Canvas'ı ayarla
         this.canvas = this.elements.visualizationCanvas;
         this.ctx = this.canvas.getContext('2d');
 
         this.initPolygonDrawing();
+        this.toggleAreaMode();
     }
 
     initPolygonDrawing() {
@@ -180,6 +189,16 @@ class PanelPlacementApp {
             this.polygonCtx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
             this.polygonCtx.fill();
         });
+    }
+
+    toggleAreaMode() {
+        if (this.elements.modeDrawing.checked) {
+            this.elements.numericArea.style.display = 'none';
+            this.elements.polygonDrawing.style.display = '';
+        } else {
+            this.elements.numericArea.style.display = '';
+            this.elements.polygonDrawing.style.display = 'none';
+        }
     }
 
     addPolygonPoint(x, y) {
