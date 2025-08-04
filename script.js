@@ -45,6 +45,8 @@ class PanelPlacementApp {
             finishDrawingBtn: document.getElementById('finishDrawingBtn'),
             confirmPolygonBtn: document.getElementById('confirmPolygonBtn'),
             segmentInfo: document.getElementById('segmentInfo')
+ codex/add-polygon-drawing-functionality
+
         };
 
         // Event listener'ları ekle
@@ -242,6 +244,7 @@ class PanelPlacementApp {
             finishDrawingBtn: document.getElementById('finishDrawingBtn'),
             confirmPolygonBtn: document.getElementById('confirmPolygonBtn'),
             segmentInfo: document.getElementById('segmentInfo')
+ main
         };
 
         // Event listener'ları ekle

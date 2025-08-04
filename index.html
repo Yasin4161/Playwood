@@ -62,6 +62,18 @@
                         <i class="fas fa-calculator"></i> Yerleştirmeyi Hesapla
                     </button>
                 </div>
+ codex/add-polygon-drawing-functionality
+
+                <div class="polygon-drawing">
+                    <div class="drawing-controls">
+                        <button id="addPointBtn" class="btn btn-secondary">Nokta Ekle</button>
+                        <button id="finishDrawingBtn" class="btn btn-secondary">Çizimi Bitir</button>
+                        <button id="confirmPolygonBtn" class="btn btn-primary" style="display: none;">Tamam</button>
+                        <div id="segmentInfo" class="segment-info"></div>
+                    </div>
+                    <canvas id="polygonCanvas" width="400" height="400"></canvas>
+                </div>
+
                 diff --git a/index.html b/index.html
 index 4a165d918a2983fb1ce0f14a06f4ad260beacfb5..ee1686f7ae14572aa2c7843e0d6c077ba89a9122 100644
 --- a/index.html
@@ -128,6 +140,7 @@ index 4a165d918a2983fb1ce0f14a06f4ad260beacfb5..ee1686f7ae14572aa2c7843e0d6c077b
                              <p>Kalan Alan (m²)</p>
                          </div>
 
+ main
             </section>
 
             <!-- Sonuçlar Bölümü -->
