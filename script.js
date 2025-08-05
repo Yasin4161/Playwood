@@ -56,7 +56,8 @@ class PanelPlacementApp {
             segmentInfo: document.getElementById('segmentInfo'),
             drawingScale: document.getElementById('drawingScale'),
             knownEdge: document.getElementById('knownEdge'),
-            knownArea: document.getElementById('knownArea')
+            knownArea: document.getElementById('knownArea'),
+            calculateDrawingBtn: document.getElementById('calculateDrawingBtn')
         };
 
         // Event listener'ları ekle
@@ -72,6 +73,13 @@ class PanelPlacementApp {
         });
         this.elements.exportBtn.addEventListener('click', () => this.exportCanvas());
         this.elements.autoScaleBtn.addEventListener('click', () => this.autoCalculateScale());
+        this.elements.calculateDrawingBtn.addEventListener('click', () => {
+            if (this.elements.resultsSection.style.display === 'block') {
+                this.elements.resultsSection.style.display = 'none';
+            } else {
+                this.calculatePlacement();
+            }
+        });
         this.elements.drawingScale.addEventListener('input', () => {
             const val = parseFloat(this.elements.drawingScale.value);
             if (val > 0) this.scaleFactor = val;
